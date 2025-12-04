@@ -1,12 +1,17 @@
+
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import WheelGame from './components/WheelGame';
 import BottleGame from './components/BottleGame';
 import SurveyGame from './components/SurveyGame';
+import NeverHaveIEver from './components/NeverHaveIEver';
+import Profile from './components/Profile';
 import { ViewState } from './types';
+import { LanguageProvider } from './contexts/LanguageContext';
+import { AuthProvider } from './contexts/AuthContext';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.HOME);
 
   const renderView = () => {
@@ -17,6 +22,10 @@ const App: React.FC = () => {
         return <BottleGame />;
       case ViewState.SURVEY:
         return <SurveyGame />;
+      case ViewState.NEVER_HAVE_I_EVER:
+        return <NeverHaveIEver />;
+      case ViewState.PROFILE:
+        return <Profile changeView={setCurrentView} />;
       case ViewState.HOME:
       default:
         return <Home changeView={setCurrentView} />;
@@ -41,6 +50,16 @@ const App: React.FC = () => {
         {renderView()}
       </main>
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <LanguageProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </LanguageProvider>
   );
 };
 

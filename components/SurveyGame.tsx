@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Survey } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
+import { saveUserSurveyList } from '../services/api';
 
 const SurveyGame: React.FC = () => {
+  const { t } = useLanguage();
+  const { user } = useAuth();
   const [mode, setMode] = useState<'SETUP' | 'GAME'>('SETUP');
   
   // Setup State
@@ -18,6 +24,20 @@ const SurveyGame: React.FC = () => {
 
   // Background Words
   const bgWords = ["Pizza?", "Sinema?", "Tatil?", "Oyun?", "Kim?", "Ne zaman?", "Parti!", "Yemek?", "Müzik?"];
+
+  // --- LOCAL STORAGE PERSISTENCE ---
+  useEffect(() => {
+    const savedList = localStorage.getItem('pz_survey_list');
+    if (savedList) {
+        try {
+            setCreatedSurveys(JSON.parse(savedList));
+        } catch(e) { console.error(e); }
+    }
+  }, []);
+
+  useEffect(() => {
+      localStorage.setItem('pz_survey_list', JSON.stringify(createdSurveys));
+  }, [createdSurveys]);
 
   // --- SETUP FUNCTIONS ---
 
@@ -58,6 +78,18 @@ const SurveyGame: React.FC = () => {
 
   const removeSurvey = (index: number) => {
     setCreatedSurveys(createdSurveys.filter((_, i) => i !== index));
+  };
+
+  const handleSaveToProfile = async () => {
+      if (!user) {
+          alert(t('login') + '!');
+          return;
+      }
+      const title = prompt(t('profile_save_title'));
+      if (title) {
+          await saveUserSurveyList(user.username, title, createdSurveys);
+          alert(t('profile_saved_success'));
+      }
   };
 
   const startGame = () => {
@@ -103,7 +135,7 @@ const SurveyGame: React.FC = () => {
       setCurrentVotes(initialVotes);
     } else {
         // End of game
-        alert("Anketler bitti! Yeniden hazırlayabilirsiniz.");
+        alert(t('survey_alert_done'));
         setMode('SETUP');
     }
   };
@@ -132,16 +164,16 @@ const SurveyGame: React.FC = () => {
          </div>
 
         <h2 className="text-4xl font-bold mb-6 text-white drop-shadow-[0_0_10px_rgba(59,130,246,0.5)] z-10">
-          Anket Listesi Hazırla
+          {t('survey_setup_title')}
         </h2>
         
         {/* Creator Panel */}
         <div className="w-full glass-panel p-6 rounded-3xl mb-6 z-10 border-blue-500/20">
           <div className="mb-4">
-            <label className="block text-blue-200 text-xs font-bold mb-2 tracking-wide">YENİ SORU</label>
+            <label className="block text-blue-200 text-xs font-bold mb-2 tracking-wide">{t('survey_new_question')}</label>
             <input 
               className="w-full bg-black/30 border border-white/10 rounded-xl p-3 text-white focus:border-blue-400 focus:ring-1 focus:ring-blue-400 outline-none transition"
-              placeholder="Soru yaz..."
+              placeholder={t('survey_placeholder_q')}
               value={currentEditQuestion}
               onChange={(e) => setCurrentEditQuestion(e.target.value)}
               disabled={createdSurveys.length >= 20}
@@ -153,7 +185,7 @@ const SurveyGame: React.FC = () => {
               <div key={i} className="flex gap-2">
                  <input 
                     className="flex-1 bg-black/20 border border-white/5 rounded-lg p-2 text-sm focus:border-blue-400 outline-none transition"
-                    placeholder={`Seçenek ${i+1}`}
+                    placeholder={`${t('survey_placeholder_opt')} ${i+1}`}
                     value={opt}
                     onChange={(e) => handleOptionChange(i, e.target.value)}
                     disabled={createdSurveys.length >= 20}
@@ -164,7 +196,7 @@ const SurveyGame: React.FC = () => {
               </div>
             ))}
              {currentEditOptions.length < 6 && createdSurveys.length < 20 && (
-              <button onClick={addOptionField} className="text-xs text-blue-300 hover:text-white font-semibold mt-1">+ Seçenek Ekle</button>
+              <button onClick={addOptionField} className="text-xs text-blue-300 hover:text-white font-semibold mt-1">{t('survey_add_opt')}</button>
             )}
           </div>
           
@@ -173,14 +205,14 @@ const SurveyGame: React.FC = () => {
              disabled={createdSurveys.length >= 20}
              className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-white btn-3d border-b-blue-800 disabled:opacity-50"
           >
-              LİSTEYE EKLE ({createdSurveys.length}/20)
+              {t('survey_add_list')} ({createdSurveys.length}/20)
           </button>
         </div>
 
         {/* List Preview */}
         {createdSurveys.length > 0 && (
             <div className="w-full mb-6 z-10">
-                <h3 className="text-white/60 text-sm font-bold mb-2 ml-2">EKLENENLER:</h3>
+                <h3 className="text-white/60 text-sm font-bold mb-2 ml-2">{t('survey_added_title')}</h3>
                 <div className="glass-panel rounded-2xl p-2 max-h-48 overflow-y-auto custom-scrollbar space-y-2">
                     {createdSurveys.map((s, i) => (
                         <div key={i} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
@@ -199,22 +231,34 @@ const SurveyGame: React.FC = () => {
                     onClick={() => setPlayOrder('SEQUENTIAL')}
                     className={`flex-1 py-2 rounded-lg text-sm font-bold transition ${playOrder === 'SEQUENTIAL' ? 'bg-blue-500 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
                  >
-                     SIRAYLA
+                     {t('survey_mode_seq')}
                  </button>
                  <button 
                     onClick={() => setPlayOrder('RANDOM')}
                     className={`flex-1 py-2 rounded-lg text-sm font-bold transition ${playOrder === 'RANDOM' ? 'bg-pink-500 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
                  >
-                     KARIŞIK
+                     {t('survey_mode_rnd')}
                  </button>
              </div>
-             <button
-                onClick={startGame}
-                disabled={createdSurveys.length === 0}
-                className="w-full py-4 rounded-2xl text-xl font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-500 btn-3d border-b-cyan-800 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                ANKETLERİ BAŞLAT
-            </button>
+             
+             <div className="flex gap-3">
+                 {user && (
+                     <button
+                        onClick={handleSaveToProfile}
+                        disabled={createdSurveys.length === 0}
+                        className="flex-1 py-4 rounded-2xl text-lg font-bold text-white bg-white/10 hover:bg-white/20 border border-white/10 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                     >
+                         {t('survey_save_btn')}
+                     </button>
+                 )}
+                <button
+                    onClick={startGame}
+                    disabled={createdSurveys.length === 0}
+                    className="flex-[2] py-4 rounded-2xl text-xl font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-500 btn-3d border-b-cyan-800 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                    {t('survey_start_btn')}
+                </button>
+             </div>
         </div>
       </div>
     );
@@ -241,7 +285,7 @@ const SurveyGame: React.FC = () => {
 
       {/* Progress Indicator */}
       <div className="w-full flex justify-between items-end mb-4 px-2 z-10">
-         <h2 className="text-3xl font-black text-white drop-shadow-md">Anket #{currentSurveyIndex + 1}</h2>
+         <h2 className="text-3xl font-black text-white drop-shadow-md">{t('survey_title')} #{currentSurveyIndex + 1}</h2>
          <span className="text-blue-200 font-bold text-sm bg-blue-900/40 px-3 py-1 rounded-full border border-blue-500/30">
             {currentSurveyIndex + 1} / {gameQueue.length}
          </span>
@@ -303,8 +347,8 @@ const SurveyGame: React.FC = () => {
             </div>
             
              <div className="mt-8 pt-6 border-t border-white/10 flex justify-between items-center text-sm text-blue-200/60 font-medium">
-                <span>Toplam <strong className="text-white">{totalVotes}</strong> oy kullanıldı</span>
-                {hasVoted && <span className="text-yellow-400 animate-pulse">Teşekkürler!</span>}
+                <span>{t('survey_total_votes')} <strong className="text-white">{totalVotes}</strong> {t('survey_votes')}</span>
+                {hasVoted && <span className="text-yellow-400 animate-pulse">{t('survey_thanks')}</span>}
             </div>
       </div>
       
@@ -314,7 +358,7 @@ const SurveyGame: React.FC = () => {
              onClick={() => setMode('SETUP')}
              className="flex-1 py-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold border border-white/10 transition backdrop-blur-md"
           >
-             ÇIKIŞ YAP
+             {t('survey_exit')}
           </button>
           
           {hasVoted && (
@@ -322,7 +366,7 @@ const SurveyGame: React.FC = () => {
                 onClick={nextSurvey}
                 className="flex-1 py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-white font-bold btn-3d border-b-green-700 shadow-lg shadow-green-500/30 animate-in fade-in slide-in-from-right-10"
             >
-                {currentSurveyIndex < gameQueue.length - 1 ? 'SIRADAKİ SORU →' : 'BİTİR'}
+                {currentSurveyIndex < gameQueue.length - 1 ? t('survey_next') : t('survey_finish')}
             </button>
           )}
       </div>

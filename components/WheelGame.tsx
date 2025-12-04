@@ -1,11 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
-import { getMixedQuestions } from '../services/api';
+import { getMixedQuestions, saveUserWheel } from '../services/api';
 import { soundManager } from '../utils/SoundManager';
 import { WheelIcon } from './Icons';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#06b6d4'];
 
 const WheelGame: React.FC = () => {
+  const { t } = useLanguage();
+  const { user } = useAuth();
   const [mode, setMode] = useState<'SETUP' | 'GAME'>('SETUP');
   const [isLoading, setIsLoading] = useState(false);
   
@@ -46,7 +51,7 @@ const WheelGame: React.FC = () => {
   // ----------------------------------
 
   const handleAddQuestion = () => {
-    if (newQuestionInput.trim() && userQuestions.length < 20) {
+    if (newQuestionInput.trim() && userQuestions.length < targetCount) {
       setUserQuestions([...userQuestions, newQuestionInput.trim()]);
       setNewQuestionInput('');
     }
@@ -56,9 +61,23 @@ const WheelGame: React.FC = () => {
     setUserQuestions(userQuestions.filter((_, i) => i !== index));
   };
 
+  const handleSaveToProfile = async () => {
+      if (!user) {
+          alert(t('login') + '!');
+          return;
+      }
+      const title = prompt(t('profile_save_title'));
+      if (title) {
+          await saveUserWheel(user.username, title, userQuestions, targetCount);
+          alert(t('profile_saved_success'));
+      }
+  };
+
   const handleStartGame = async () => {
     setIsLoading(true);
     try {
+      // Note: Backend might return Turkish questions, but UI is translated.
+      // In a real app, API would take a locale param.
       const finalQuestions = await getMixedQuestions(targetCount, userQuestions);
       setQuestions(finalQuestions);
       setMode('GAME');
@@ -66,7 +85,7 @@ const WheelGame: React.FC = () => {
       setSelectedQuestion(null);
     } catch (e) {
       console.error("Failed to load questions", e);
-      alert("Sorular yüklenirken bir hata oluştu.");
+      alert("Error loading questions.");
     } finally {
       setIsLoading(false);
     }
@@ -123,12 +142,12 @@ const WheelGame: React.FC = () => {
         </div>
 
          <h2 className="text-4xl font-bold mb-8 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] z-10">
-          Çarkı Hazırla
+          {t('wheel_setup_title')}
         </h2>
 
         {/* Glass Card */}
         <div className="w-full glass-panel p-8 rounded-3xl mb-8 z-10">
-          <label className="block text-purple-200 text-sm mb-4 font-semibold tracking-wide">DİLİM SAYISI: <span className="text-white text-lg">{targetCount}</span></label>
+          <label className="block text-purple-200 text-sm mb-4 font-semibold tracking-wide">{t('wheel_slice_count')}: <span className="text-white text-lg">{targetCount}</span></label>
           <div className="flex items-center gap-4 mb-8">
             <input 
               type="range" 
@@ -140,23 +159,23 @@ const WheelGame: React.FC = () => {
             />
           </div>
 
-          <label className="block text-purple-200 text-sm mb-2 font-semibold tracking-wide">ÖZEL SORULAR ({userQuestions.length}/20)</label>
+          <label className="block text-purple-200 text-sm mb-2 font-semibold tracking-wide">{t('wheel_custom_questions')} ({userQuestions.length}/{targetCount})</label>
           <div className="flex gap-3 mb-6">
              <input
               type="text"
               value={newQuestionInput}
               onChange={(e) => setNewQuestionInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddQuestion()}
-              placeholder="Soru yaz..."
+              placeholder={t('wheel_placeholder')}
               className="flex-1 bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition shadow-inner"
-              disabled={userQuestions.length >= 20}
+              disabled={userQuestions.length >= targetCount}
             />
             <button 
               onClick={handleAddQuestion}
-              disabled={userQuestions.length >= 20}
+              disabled={userQuestions.length >= targetCount}
               className="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-xl font-bold btn-3d border-b-purple-800 shadow-lg disabled:opacity-50 disabled:border-none"
             >
-              EKLE
+              {t('add').toUpperCase()}
             </button>
           </div>
 
@@ -168,18 +187,28 @@ const WheelGame: React.FC = () => {
               </div>
             ))}
             {userQuestions.length === 0 && (
-               <p className="text-gray-500 text-sm italic text-center py-2">Henüz soru eklemedin.</p>
+               <p className="text-gray-500 text-sm italic text-center py-2">{t('wheel_no_questions')}</p>
             )}
           </div>
         </div>
 
-        <button
-          onClick={handleStartGame}
-          disabled={isLoading}
-          className="w-full py-4 rounded-2xl text-xl font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 btn-3d border-b-purple-900 shadow-xl shadow-purple-600/20 hover:brightness-110 disabled:opacity-50 disabled:cursor-wait z-10"
-        >
-          {isLoading ? 'Yükleniyor...' : 'ÇARKI OLUŞTUR'}
-        </button>
+        <div className="flex gap-3 w-full z-10">
+            {user && (
+                <button
+                    onClick={handleSaveToProfile}
+                    className="flex-1 py-4 rounded-2xl text-lg font-bold text-white bg-white/10 hover:bg-white/20 border border-white/10 transition"
+                >
+                    {t('wheel_save_btn')}
+                </button>
+            )}
+            <button
+            onClick={handleStartGame}
+            disabled={isLoading}
+            className="flex-[2] py-4 rounded-2xl text-xl font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 btn-3d border-b-purple-900 shadow-xl shadow-purple-600/20 hover:brightness-110 disabled:opacity-50 disabled:cursor-wait"
+            >
+            {isLoading ? t('loading') : t('wheel_create_btn')}
+            </button>
+        </div>
       </div>
     );
   }
@@ -190,7 +219,7 @@ const WheelGame: React.FC = () => {
         onClick={() => setMode('SETUP')}
         className="absolute top-0 left-0 text-sm text-gray-300 hover:text-white glass-button px-4 py-2 rounded-full"
       >
-        ← Düzenle
+        ← {t('setup')}
       </button>
 
       {/* Wheel Area */}
@@ -211,7 +240,7 @@ const WheelGame: React.FC = () => {
             >
             {questions.length === 0 && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900/90 text-gray-400 font-bold backdrop-blur-sm">
-                    BİTTİ
+                    {t('survey_finish')}
                 </div>
             )}
             
@@ -252,7 +281,7 @@ const WheelGame: React.FC = () => {
               : 'bg-gradient-to-r from-indigo-500 to-purple-600 border-b-indigo-800 hover:brightness-110 shadow-purple-500/40'
           }`}
         >
-          {spinning ? 'DÖNÜYOR...' : 'ÇEVİR!'}
+          {spinning ? t('wheel_spinning') : t('wheel_spin_btn')}
         </button>
 
         <label className="flex items-center gap-3 cursor-pointer p-3 glass-panel rounded-xl w-full justify-center hover:bg-white/10 transition select-none">
@@ -266,7 +295,7 @@ const WheelGame: React.FC = () => {
                 <div className={`w-12 h-7 rounded-full shadow-inner transition duration-300 ${removeOnFinish ? 'bg-green-500' : 'bg-gray-700'}`}></div>
                 <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md transition transform duration-300 ${removeOnFinish ? 'translate-x-5' : 'translate-x-0'}`}></div>
              </div>
-             <span className="text-sm text-gray-300 font-medium">Çıkan soruyu sil</span>
+             <span className="text-sm text-gray-300 font-medium">{t('wheel_remove_winner')}</span>
         </label>
       </div>
 
@@ -274,7 +303,7 @@ const WheelGame: React.FC = () => {
       {selectedQuestion && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="glass-panel p-8 rounded-3xl max-w-lg w-full text-center animate-in zoom-in fade-in duration-300 shadow-[0_0_50px_rgba(168,85,247,0.4)] border border-purple-500/30">
-                <p className="text-purple-300 text-sm uppercase tracking-[0.2em] mb-4 font-bold">GELEN SORU</p>
+                <p className="text-purple-300 text-sm uppercase tracking-[0.2em] mb-4 font-bold">{t('wheel_winner_title')}</p>
                 <h3 className="text-2xl md:text-4xl font-black text-white leading-tight mb-6 text-shadow-glow">
                     "{selectedQuestion}"
                 </h3>
@@ -282,10 +311,10 @@ const WheelGame: React.FC = () => {
                     onClick={() => setSelectedQuestion(null)}
                     className="mt-2 px-8 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-bold transition border border-white/10"
                 >
-                    Tamam
+                    {t('wheel_ok')}
                 </button>
                 {removeOnFinish && (
-                    <p className="text-red-400 text-xs mt-4 italic opacity-70">* Bu soru listeden silindi</p>
+                    <p className="text-red-400 text-xs mt-4 italic opacity-70">{t('wheel_removed_hint')}</p>
                 )}
             </div>
         </div>

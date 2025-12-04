@@ -1,8 +1,17 @@
+
 export enum ViewState {
   HOME = 'HOME',
   WHEEL = 'WHEEL',
   BOTTLE = 'BOTTLE',
-  SURVEY = 'SURVEY'
+  SURVEY = 'SURVEY',
+  NEVER_HAVE_I_EVER = 'NEVER_HAVE_I_EVER',
+  PROFILE = 'PROFILE'
+}
+
+export interface User {
+  username: string;
+  email: string;
+  avatarId?: number; // 0-7 index for predefined avatars
 }
 
 export interface Question {
@@ -21,4 +30,29 @@ export interface Survey {
   id: string;
   question: string;
   options: SurveyOption[];
+}
+
+export interface SavedWheel {
+  id: string;
+  username: string;
+  title: string;
+  questions: string[];
+  targetCount: number;
+  createdAt: string;
+}
+
+export interface SavedSurveyList {
+  id: string;
+  username: string;
+  title: string;
+  surveys: Survey[];
+  createdAt: string;
+}
+
+export interface SavedNHIEList {
+  id: string;
+  username: string;
+  title: string;
+  questions: string[];
+  createdAt: string;
 }

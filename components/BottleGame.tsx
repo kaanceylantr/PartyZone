@@ -1,8 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { soundManager } from '../utils/SoundManager';
 import { BottleIcon } from './Icons';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const BottleGame: React.FC = () => {
+  const { t } = useLanguage();
   const [mode, setMode] = useState<'SETUP' | 'GAME'>('SETUP');
   const [players, setPlayers] = useState<string[]>([]);
   const [playerName, setPlayerName] = useState('');
@@ -96,7 +99,7 @@ const BottleGame: React.FC = () => {
         </div>
 
         <h2 className="text-4xl font-extrabold mb-8 text-white drop-shadow-md z-10 tracking-tight">
-          Oyuncu Ekle
+          {t('bottle_setup_title')}
         </h2>
         
         <div className="w-full glass-panel p-6 rounded-3xl mb-8 z-10">
@@ -106,14 +109,14 @@ const BottleGame: React.FC = () => {
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
-                placeholder="Oyuncu adı..."
+                placeholder={t('bottle_placeholder')}
                 className="flex-1 bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 transition"
             />
             <button 
                 onClick={addPlayer}
                 className="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-xl font-bold btn-3d border-b-green-700"
             >
-                EKLE
+                {t('add').toUpperCase()}
             </button>
             </div>
 
@@ -124,7 +127,7 @@ const BottleGame: React.FC = () => {
                 <button onClick={() => removePlayer(i)} className="text-gray-400 hover:text-red-400 font-bold bg-black/20 rounded-full w-5 h-5 flex items-center justify-center">×</button>
                 </div>
             ))}
-            {players.length === 0 && <p className="text-gray-500 text-sm w-full text-center py-4">Henüz kimse yok. Arkadaşlarını ekle!</p>}
+            {players.length === 0 && <p className="text-gray-500 text-sm w-full text-center py-4">{t('bottle_no_players')}</p>}
             </div>
         </div>
 
@@ -137,7 +140,7 @@ const BottleGame: React.FC = () => {
               : 'bg-gradient-to-r from-emerald-500 to-teal-600 border-b-emerald-800 hover:brightness-110 shadow-lg shadow-emerald-500/30'
           }`}
         >
-          OYUNU BAŞLAT ({players.length})
+          {t('bottle_start_btn')} ({players.length})
         </button>
       </div>
     );
@@ -151,7 +154,7 @@ const BottleGame: React.FC = () => {
             onClick={() => setMode('SETUP')}
             className="text-sm text-gray-300 hover:text-white glass-button px-4 py-2 rounded-full font-semibold"
           >
-            ← Düzenle
+            ← {t('setup')}
           </button>
           
            <button 
@@ -160,7 +163,7 @@ const BottleGame: React.FC = () => {
             className="text-sm flex items-center gap-2 text-emerald-300 hover:text-white glass-button px-4 py-2 rounded-full border-emerald-500/30 transition disabled:opacity-50 font-semibold"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-            Karıştır
+            {t('bottle_shuffle')}
           </button>
       </div>
      
@@ -169,9 +172,9 @@ const BottleGame: React.FC = () => {
         {result && (
           <div className="glass-panel p-6 rounded-2xl border border-emerald-500/30 text-center shadow-[0_0_30px_rgba(16,185,129,0.2)]">
             <div className="text-emerald-300 font-bold text-2xl mb-1 drop-shadow-sm">{result.asker}</div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">SORUYOR</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">{t('bottle_asks')}</div>
             <div className="text-white text-2xl font-black my-1">⬇</div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">CEVAPLIYOR</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">{t('bottle_answers')}</div>
             <div className="text-pink-400 font-bold text-2xl mt-1 drop-shadow-sm">{result.answerer}</div>
           </div>
         )}
@@ -258,7 +261,7 @@ const BottleGame: React.FC = () => {
                         transform="rotate(-90 50 160)" 
                         style={{ letterSpacing: '2px' }}
                       >
-                        ÇEVİR
+                        {t('bottle_label')}
                       </text>
                   </svg>
               </div>
@@ -268,7 +271,7 @@ const BottleGame: React.FC = () => {
 
       {/* Helper Text to replace the button */}
       <div className="mt-20 text-emerald-300/80 animate-pulse text-lg font-bold tracking-widest uppercase pointer-events-none select-none">
-        {spinning ? 'Dönüyor...' : 'Çevirmek için şişeye dokun'}
+        {spinning ? t('bottle_spinning') : t('bottle_hint')}
       </div>
     </div>
   );
