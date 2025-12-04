@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { soundManager } from '../utils/SoundManager';
+import { BottleIcon } from './Icons';
 
 const BottleGame: React.FC = () => {
   const [mode, setMode] = useState<'SETUP' | 'GAME'>('SETUP');
@@ -88,12 +89,17 @@ const BottleGame: React.FC = () => {
 
   if (mode === 'SETUP') {
     return (
-      <div className="flex flex-col items-center w-full min-h-[70vh] max-w-md mx-auto pt-4">
-        <h2 className="text-4xl font-bold mb-8 text-white drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]">
+      <div className="flex flex-col items-center w-full min-h-[70vh] max-w-md mx-auto pt-4 relative">
+         {/* Background Effect */}
+         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none z-0">
+            <BottleIcon className="w-96 h-96 animate-spin-slow" />
+        </div>
+
+        <h2 className="text-4xl font-extrabold mb-8 text-white drop-shadow-md z-10 tracking-tight">
           Oyuncu Ekle
         </h2>
         
-        <div className="w-full glass-panel p-6 rounded-3xl mb-8">
+        <div className="w-full glass-panel p-6 rounded-3xl mb-8 z-10">
             <div className="flex w-full gap-3 mb-6">
             <input
                 type="text"
@@ -111,10 +117,10 @@ const BottleGame: React.FC = () => {
             </button>
             </div>
 
-            <div className="w-full flex flex-wrap gap-2 max-h-60 overflow-y-auto">
+            <div className="w-full flex flex-wrap gap-2 max-h-60 overflow-y-auto custom-scrollbar">
             {players.map((p, i) => (
                 <div key={i} className="flex items-center gap-2 bg-white/5 pl-4 pr-2 py-2 rounded-full border border-white/10 group hover:bg-white/10 transition">
-                <span className="font-medium text-sm">{p}</span>
+                <span className="font-semibold text-sm">{p}</span>
                 <button onClick={() => removePlayer(i)} className="text-gray-400 hover:text-red-400 font-bold bg-black/20 rounded-full w-5 h-5 flex items-center justify-center">×</button>
                 </div>
             ))}
@@ -125,7 +131,7 @@ const BottleGame: React.FC = () => {
         <button
           onClick={startGame}
           disabled={players.length < 2}
-          className={`w-full py-4 rounded-2xl text-xl font-bold text-white btn-3d transition ${
+          className={`w-full py-4 rounded-2xl text-xl font-bold text-white btn-3d transition z-10 ${
             players.length < 2 
               ? 'bg-gray-700 border-b-gray-800 text-gray-500 cursor-not-allowed' 
               : 'bg-gradient-to-r from-emerald-500 to-teal-600 border-b-emerald-800 hover:brightness-110 shadow-lg shadow-emerald-500/30'
@@ -143,7 +149,7 @@ const BottleGame: React.FC = () => {
       <div className="absolute top-0 w-full flex justify-between items-start px-4 z-20">
            <button 
             onClick={() => setMode('SETUP')}
-            className="text-sm text-gray-300 hover:text-white glass-button px-4 py-2 rounded-full"
+            className="text-sm text-gray-300 hover:text-white glass-button px-4 py-2 rounded-full font-semibold"
           >
             ← Düzenle
           </button>
@@ -151,7 +157,7 @@ const BottleGame: React.FC = () => {
            <button 
             onClick={shufflePlayers}
             disabled={spinning}
-            className="text-sm flex items-center gap-2 text-emerald-300 hover:text-white glass-button px-4 py-2 rounded-full border-emerald-500/30 transition disabled:opacity-50"
+            className="text-sm flex items-center gap-2 text-emerald-300 hover:text-white glass-button px-4 py-2 rounded-full border-emerald-500/30 transition disabled:opacity-50 font-semibold"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
             Karıştır
@@ -163,16 +169,16 @@ const BottleGame: React.FC = () => {
         {result && (
           <div className="glass-panel p-6 rounded-2xl border border-emerald-500/30 text-center shadow-[0_0_30px_rgba(16,185,129,0.2)]">
             <div className="text-emerald-300 font-bold text-2xl mb-1 drop-shadow-sm">{result.asker}</div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-[0.2em]">SORUYOR</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">SORUYOR</div>
             <div className="text-white text-2xl font-black my-1">⬇</div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-[0.2em]">CEVAPLIYOR</div>
+            <div className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-bold">CEVAPLIYOR</div>
             <div className="text-pink-400 font-bold text-2xl mt-1 drop-shadow-sm">{result.answerer}</div>
           </div>
         )}
       </div>
 
       {/* Game Area */}
-      <div className="relative w-[340px] h-[340px] md:w-[450px] md:h-[450px] flex items-center justify-center mt-12">
+      <div className="relative w-[340px] h-[340px] md:w-[450px] md:h-[450px] flex items-center justify-center mt-12 z-0">
         
         {/* Spotlight Effect Under Bottle */}
         <div className="absolute inset-0 bg-radial-gradient from-emerald-500/20 to-transparent opacity-50 blur-2xl pointer-events-none"></div>
@@ -213,11 +219,11 @@ const BottleGame: React.FC = () => {
           className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
         >
           <div 
-            className="w-32 h-80 flex items-center justify-center transition-transform duration-[3500ms] cubic-bezier(0.2, 0.8, 0.2, 1) pointer-events-auto origin-center filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
+            className="w-32 h-80 flex items-center justify-center transition-transform duration-[3500ms] cubic-bezier(0.2, 0.8, 0.2, 1) pointer-events-auto origin-center filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] cursor-pointer group"
             style={{ transform: `rotate(${rotation}deg)` }}
             onClick={spinBottle}
           >
-              <div className="cursor-pointer hover:scale-105 transition-transform">
+              <div className="hover:scale-105 transition-transform">
                   {/* SVG Bottle */}
                   <svg width="120" height="340" viewBox="0 0 100 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                       {/* Glass Body with Gradient */}
@@ -243,7 +249,7 @@ const BottleGame: React.FC = () => {
                       <text 
                         x="50" 
                         y="160" 
-                        fontFamily="Fredoka, sans-serif" 
+                        fontFamily="'Nunito', sans-serif" 
                         fontSize="20" 
                         fontWeight="bold" 
                         fill="#78350f" 
@@ -260,13 +266,10 @@ const BottleGame: React.FC = () => {
         </div>
       </div>
 
-      <button
-        onClick={spinBottle}
-        disabled={spinning}
-        className="mt-24 px-12 py-4 bg-emerald-500 text-white font-black text-xl rounded-2xl btn-3d border-b-emerald-800 shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:brightness-110 active:scale-95 transition"
-      >
-        {spinning ? 'DÖNÜYOR...' : 'ÇEVİR GELSİN'}
-      </button>
+      {/* Helper Text to replace the button */}
+      <div className="mt-20 text-emerald-300/80 animate-pulse text-lg font-bold tracking-widest uppercase pointer-events-none select-none">
+        {spinning ? 'Dönüyor...' : 'Çevirmek için şişeye dokun'}
+      </div>
     </div>
   );
 };

@@ -24,13 +24,13 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-party-bg text-white selection:bg-pink-500 selection:text-white overflow-hidden pb-28 md:pb-0 md:pt-24 font-fredoka">
+    <div className="relative min-h-screen bg-party-bg text-white selection:bg-pink-500 selection:text-white overflow-hidden pb-28 md:pb-0 md:pt-24 font-nunito">
       
       {/* Animated Lava Lamp Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-[-10%] w-[500px] h-[500px] bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-32 left-[20%] w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-0 left-[-10%] w-[500px] h-[500px] bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-32 left-[20%] w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
         {/* Grid Overlay for texture */}
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
       </div>

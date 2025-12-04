@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getMixedQuestions } from '../services/api';
 import { soundManager } from '../utils/SoundManager';
+import { WheelIcon } from './Icons';
 
 const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#06b6d4'];
 
@@ -115,13 +116,18 @@ const WheelGame: React.FC = () => {
 
   if (mode === 'SETUP') {
     return (
-      <div className="flex flex-col items-center w-full max-w-2xl mx-auto px-4 pt-4 pb-20">
-         <h2 className="text-4xl font-bold mb-8 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+      <div className="flex flex-col items-center w-full max-w-2xl mx-auto px-4 pt-4 pb-20 relative">
+         {/* Background Effect */}
+         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none z-0">
+            <WheelIcon className="w-96 h-96 animate-spin-slow" />
+        </div>
+
+         <h2 className="text-4xl font-bold mb-8 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] z-10">
           Çarkı Hazırla
         </h2>
 
         {/* Glass Card */}
-        <div className="w-full glass-panel p-8 rounded-3xl mb-8">
+        <div className="w-full glass-panel p-8 rounded-3xl mb-8 z-10">
           <label className="block text-purple-200 text-sm mb-4 font-semibold tracking-wide">DİLİM SAYISI: <span className="text-white text-lg">{targetCount}</span></label>
           <div className="flex items-center gap-4 mb-8">
             <input 
@@ -170,7 +176,7 @@ const WheelGame: React.FC = () => {
         <button
           onClick={handleStartGame}
           disabled={isLoading}
-          className="w-full py-4 rounded-2xl text-xl font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 btn-3d border-b-purple-900 shadow-xl shadow-purple-600/20 hover:brightness-110 disabled:opacity-50 disabled:cursor-wait"
+          className="w-full py-4 rounded-2xl text-xl font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 btn-3d border-b-purple-900 shadow-xl shadow-purple-600/20 hover:brightness-110 disabled:opacity-50 disabled:cursor-wait z-10"
         >
           {isLoading ? 'Yükleniyor...' : 'ÇARKI OLUŞTUR'}
         </button>
@@ -267,7 +273,7 @@ const WheelGame: React.FC = () => {
       {/* Result Modal */}
       {selectedQuestion && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="glass-panel p-8 rounded-3xl max-w-lg w-full text-center animate-bounce-slow shadow-[0_0_50px_rgba(168,85,247,0.4)] border border-purple-500/30">
+            <div className="glass-panel p-8 rounded-3xl max-w-lg w-full text-center animate-in zoom-in fade-in duration-300 shadow-[0_0_50px_rgba(168,85,247,0.4)] border border-purple-500/30">
                 <p className="text-purple-300 text-sm uppercase tracking-[0.2em] mb-4 font-bold">GELEN SORU</p>
                 <h3 className="text-2xl md:text-4xl font-black text-white leading-tight mb-6 text-shadow-glow">
                     "{selectedQuestion}"
